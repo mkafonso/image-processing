@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 
+import { GetJobByIdService } from "../../core/services/get-job-by-id.service";
 import {
   ListJobsService,
   type ListJobsServiceInput,
@@ -7,6 +8,7 @@ import {
 import { NewImageProcessingService } from "../../core/services/new-image-processing.service";
 import { FirestoreJobsRepository } from "../../infra/firebase/firestore-jobs.repository";
 import { BullMQQueueProvider } from "../../infra/queue/bullmq-queue.provider";
+import { GetJobByIdMapper } from "../mappers/get-job-by-id.mapper";
 import { ListJobsMapper } from "../mappers/list-jobs.mapper";
 
 export async function jobsRoutes(app: FastifyInstance) {
@@ -56,6 +58,37 @@ export async function jobsRoutes(app: FastifyInstance) {
 
       return reply.code(500).send({
         message: "Failed to create job",
+        error: err.message ?? err,
+      });
+    }
+  });
+
+  app.get("/api/jobs/:id", async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+
+      const service = new GetJobByIdService(jobsRepository);
+      const response = await service.execute({ id });
+
+      const httpResponse = GetJobByIdMapper.toHttp(response);
+
+      return reply.code(200).send(httpResponse);
+    } catch (err: any) {
+      console.error(err);
+
+      if (err.name === "BadRequestError") {
+        return reply.code(400).send({
+          message: err.message,
+          errors: err.errors ?? {},
+        });
+      }
+
+      if (err.name === "NotFoundResourceError") {
+        return reply.code(404).send({ message: err.message });
+      }
+
+      return reply.code(500).send({
+        message: "Failed to get job",
         error: err.message ?? err,
       });
     }
