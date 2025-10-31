@@ -2,6 +2,10 @@
 
 Simple, modern image-processing pipeline with a Fastify API, Redis-backed worker, and a Vite + React frontend. Real-time job updates are delivered via Firebase.
 
+### Demo
+
+https://github.com/user-attachments/assets/da4541a5-8679-4092-8fe4-43c2fdb8889e
+
 ### Highlights
 
 - **Fast API**: Fastify with CORS and static file serving (`/uploads`).
