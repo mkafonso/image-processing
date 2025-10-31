@@ -6,7 +6,9 @@
     "test": "vitest"
   },
   "devDependencies": {
+    "@image-processing/errors": "*",
     "@image-processing/tsconfig": "*",
+    "@types/node": "24.9.2",
     "vitest": "4.0.5"
   }
 }
