@@ -3,12 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "dev": "tsx watch ./app/server.ts",
     "test": "vitest"
   },
   "devDependencies": {
     "@image-processing/errors": "*",
     "@image-processing/tsconfig": "*",
     "@types/node": "24.9.2",
+    "tsx": "4.20.6",
     "vitest": "4.0.5"
+  },
+  "dependencies": {
+    "bullmq": "5.63.0",
+    "fastify": "5.6.1"
   }
 }
