@@ -56,6 +56,21 @@ export class MemoryJobsRepository implements JobsRepositoryPort {
     return `memory://results/${jobId}/${filename}`;
   }
 
+  async findPaginated(
+    page: number,
+    pageSize: number
+  ): Promise<{ jobs: Job[]; total: number }> {
+    const allJobs = Array.from(this.jobs.values()).sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
+    const total = allJobs.length;
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const jobs = allJobs.slice(start, end);
+
+    return { jobs, total };
+  }
+
   async clear(): Promise<void> {
     this.jobs.clear();
     this.results.clear();

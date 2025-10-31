@@ -15,4 +15,8 @@ export interface JobsRepositoryPort {
     buffer: Buffer,
     filename: string
   ): Promise<string>;
+  findPaginated(
+    page: number,
+    pageSize: number
+  ): Promise<{ jobs: Job[]; total: number }>;
 }
