@@ -5,7 +5,7 @@ import { Job } from "../entities/job.entity";
 import type { JobsRepositoryPort } from "../ports/jobs-repository.port";
 import type { QueueProviderPort } from "../ports/queue-provider.port";
 
-type NewImageProcessingServiceInput = {
+export type NewImageProcessingServiceInput = {
   imageUrl: string;
 };
 
@@ -67,19 +67,29 @@ export class NewImageProcessingService {
       });
     }
 
-    if (!/\.(png|jpg|jpeg)$/i.test(url.pathname)) {
-      throw new BadRequestError("Invalid input", {
-        imageUrl: "Only PNG and JPG image URLs are supported",
-      });
-    }
-
     let response: Response;
     try {
-      response = await fetch(url.toString(), { method: "HEAD" });
+      response = await fetch(url.toString(), {
+        method: "HEAD",
+        redirect: "follow",
+      });
     } catch {
       throw new BadRequestError("Invalid input", {
         imageUrl: "URL is unreachable or invalid",
       });
+    }
+
+    if (!response.ok) {
+      try {
+        response = await fetch(url.toString(), {
+          method: "GET",
+          redirect: "follow",
+        });
+      } catch {
+        throw new BadRequestError("Invalid input", {
+          imageUrl: "URL is unreachable or invalid",
+        });
+      }
     }
 
     if (!response.ok) {
@@ -88,8 +98,25 @@ export class NewImageProcessingService {
       });
     }
 
+    const contentType = response.headers.get("content-type") ?? "";
+    if (!contentType.startsWith("image/")) {
+      throw new BadRequestError("Invalid input", {
+        imageUrl: "URL does not point to a valid image",
+      });
+    }
+
+    const pathname = url.pathname.toLowerCase();
+    if (
+      !/\.(png|jpg|jpeg)$/i.test(pathname) &&
+      !["image/png", "image/jpeg"].includes(contentType)
+    ) {
+      throw new BadRequestError("Invalid input", {
+        imageUrl: "Only PNG and JPG image URLs are supported",
+      });
+    }
+
     const contentLength = Number(response.headers.get("content-length") ?? 0);
-    if (contentLength > this.MAX_SIZE_BYTES) {
+    if (contentLength && contentLength > this.MAX_SIZE_BYTES) {
       throw new BadRequestError("Invalid input", {
         imageUrl: "Image exceeds 10MB size limit",
       });

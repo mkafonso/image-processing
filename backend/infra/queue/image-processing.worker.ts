@@ -1,9 +1,9 @@
 import { Worker } from "bullmq";
 import sharp from "sharp";
 
-import { MemoryJobsRepository } from "../../__tests__/repositories/memory-jobs.repository";
+import { FirestoreJobsRepository } from "../firebase/firestore-jobs.repository";
 
-const jobsRepository = new MemoryJobsRepository();
+const jobsRepository = new FirestoreJobsRepository();
 
 const redisHost = process.env.REDIS_HOST ?? "localhost";
 const redisPort = process.env.REDIS_PORT ?? "6379";
@@ -32,6 +32,8 @@ export const worker = new Worker(
       if (!response.ok)
         throw new Error(`Failed to fetch image: ${response.statusText}`);
       const imageBuffer = Buffer.from(await response.arrayBuffer());
+
+      await jobsRepository.saveImageInputForDebug(jobId, imageBuffer);
 
       await jobsRepository.updateProgress(jobId, 30);
 
