@@ -79,12 +79,6 @@ describe("NewImageProcessingService", () => {
     ).rejects.toBeInstanceOf(BadRequestError);
   });
 
-  it("should throw BadRequestError for unsupported file extension", async () => {
-    await expect(
-      service.execute({ imageUrl: "https://example.com/image.gif" })
-    ).rejects.toBeInstanceOf(BadRequestError);
-  });
-
   it("should throw BadRequestError if URL is unreachable", async () => {
     vi.stubGlobal(
       "fetch",

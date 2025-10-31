@@ -15,7 +15,6 @@ describe("ListJobsService", () => {
 
   it("should return empty list when there are no jobs", async () => {
     const result = await service.execute();
-
     expect(result.jobs).toHaveLength(0);
     expect(result.pagination).toEqual({
       page: 1,
@@ -32,20 +31,22 @@ describe("ListJobsService", () => {
     const result = await service.execute();
 
     expect(result.jobs).toHaveLength(2);
-    expect(result.pagination.page).toBe(1);
-    expect(result.pagination.pageSize).toBe(10);
-    expect(result.pagination.total).toBe(2);
-    expect(result.pagination.totalPages).toBe(1);
+    expect(result.pagination).toEqual({
+      page: 1,
+      pageSize: 10,
+      total: 2,
+      totalPages: 1,
+    });
   });
 
   it("should return paginated results correctly", async () => {
     for (let i = 1; i <= 15; i++) {
-      const job = makeJob({
-        id: String(i),
-        createdAt: new Date(Date.now() - i * 1000),
-      });
-
-      await jobsRepository.save(job);
+      await jobsRepository.save(
+        makeJob({
+          id: String(i),
+          createdAt: new Date(Date.now() - i * 1000),
+        })
+      );
     }
 
     const result = await service.execute({ page: 2, pageSize: 5 });
