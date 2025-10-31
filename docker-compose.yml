@@ -22,6 +22,13 @@ services:
       - "3000:3000"
     depends_on:
       - redis
+    healthcheck:
+      test:
+        ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
     restart: unless-stopped
     volumes:
       - ./:/usr/src/app
@@ -44,3 +51,22 @@ services:
     volumes:
       - ./:/usr/src/app
     working_dir: /usr/src/app
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_BASE_URL: "http://localhost:3000/api"
+    container_name: frontend
+    ports:
+      - "5173:80"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
