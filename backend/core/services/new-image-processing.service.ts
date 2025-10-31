@@ -5,13 +5,13 @@ import { Job } from "../entities/job.entity";
 import type { JobsRepositoryPort } from "../ports/jobs-repository.port";
 import type { QueueProviderPort } from "../ports/queue-provider.port";
 
-type NewJobServiceInput = {
+type NewImageProcessingServiceInput = {
   imageUrl: string;
 };
 
-type NewJobServiceExport = {};
+type NewImageProcessingServiceOutput = {};
 
-export class NewJobService {
+export class NewImageProcessingService {
   private readonly MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 
   constructor(
@@ -19,7 +19,9 @@ export class NewJobService {
     private queueProvider: QueueProviderPort
   ) {}
 
-  async execute(input: NewJobServiceInput): Promise<NewJobServiceExport> {
+  async execute(
+    input: NewImageProcessingServiceInput
+  ): Promise<NewImageProcessingServiceOutput> {
     const sanitizedInput = this.sanitize(input);
     await this.validate(sanitizedInput);
 
@@ -35,13 +37,15 @@ export class NewJobService {
     return {};
   }
 
-  private sanitize(input: NewJobServiceInput): NewJobServiceInput {
+  private sanitize(
+    input: NewImageProcessingServiceInput
+  ): NewImageProcessingServiceInput {
     return {
       imageUrl: input.imageUrl.trim(),
     };
   }
 
-  private async validate(input: NewJobServiceInput): Promise<void> {
+  private async validate(input: NewImageProcessingServiceInput): Promise<void> {
     if (!input.imageUrl || input.imageUrl.trim().length === 0) {
       throw new BadRequestError("Invalid input", {
         imageUrl: "Image URL is required",
