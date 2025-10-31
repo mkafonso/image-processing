@@ -17,9 +17,9 @@ describe("BadRequestError", () => {
 
   it("should accept details in the error", () => {
     const error = new BadRequestError("Invalid input", {
-      email: "Formato inválido",
+      imageUrl: "invalid URL format",
     });
 
-    expect(error.details).toEqual({ email: "Formato inválido" });
+    expect(error.details).toEqual({ imageUrl: "invalid URL format" });
   });
 });
